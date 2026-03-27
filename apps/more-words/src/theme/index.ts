@@ -56,6 +56,70 @@ export const midnight: Theme = {
   },
 };
 
+export const paper: Theme = {
+  name: 'paper',
+  colors: {
+    background: '#f5f0e8',
+    surface: '#ede8dd',
+    word: '#1a1a1a',
+    accent: '#8b4513',
+    secondary: '#666666',
+    muted: '#999999',
+    error: '#cc3333',
+    tabBar: '#f5f0e8',
+    tabBarBorder: '#ddd8cc',
+    tabActive: '#8b4513',
+    tabInactive: '#999999',
+    heartFilled: '#8b4513',
+    heartEmpty: '#cccccc',
+  },
+  typography: {
+    wordSize: 42,
+    definitionSize: 18,
+    pronunciationSize: 14,
+    etymologySize: 14,
+    exampleSize: 15,
+    usageSize: 13,
+    wordFamily: 'Georgia',
+    bodyFamily: 'System',
+  },
+};
+
+export const bloom: Theme = {
+  name: 'bloom',
+  colors: {
+    background: '#1a0a2e',
+    surface: '#241440',
+    word: '#e8d5f5',
+    accent: '#c084fc',
+    secondary: '#9d7bb0',
+    muted: '#6b4f80',
+    error: '#ff5577',
+    tabBar: '#1a0a2e',
+    tabBarBorder: '#2a1a40',
+    tabActive: '#c084fc',
+    tabInactive: '#6b4f80',
+    heartFilled: '#c084fc',
+    heartEmpty: '#6b4f80',
+  },
+  typography: {
+    wordSize: 42,
+    definitionSize: 18,
+    pronunciationSize: 14,
+    etymologySize: 14,
+    exampleSize: 15,
+    usageSize: 13,
+    wordFamily: 'Georgia',
+    bodyFamily: 'System',
+  },
+};
+
+export const themes: Record<string, Theme> = {midnight, paper, bloom};
+
+export function getTheme(name: string): Theme {
+  return themes[name] ?? midnight;
+}
+
 // Kid theme overrides — always bright regardless of adult theme
 export const kidColors = {
   backgrounds: [

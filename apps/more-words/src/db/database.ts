@@ -297,3 +297,63 @@ export async function getDefaultProfile(): Promise<Profile> {
   }
   return results.rows.item(0) as Profile;
 }
+
+export async function getAllProfiles(): Promise<Profile[]> {
+  const [results] = await getDB().executeSql(
+    'SELECT * FROM profiles ORDER BY id ASC',
+  );
+  return rowsToArray<Profile>(results);
+}
+
+export async function createProfile(
+  name: string,
+  isKid: number,
+  theme: string,
+  interests: string = '[]',
+): Promise<number> {
+  const [results] = await getDB().executeSql(
+    'INSERT INTO profiles (name, is_kid, theme, interests) VALUES (?, ?, ?, ?)',
+    [name, isKid, theme, interests],
+  );
+  return results.insertId ?? 0;
+}
+
+export async function updateProfile(
+  id: number,
+  updates: Partial<Profile>,
+): Promise<void> {
+  const fields: string[] = [];
+  const values: unknown[] = [];
+  for (const [key, val] of Object.entries(updates)) {
+    if (key === 'id') continue;
+    fields.push(`${key} = ?`);
+    values.push(val);
+  }
+  if (fields.length === 0) return;
+  values.push(id);
+  await getDB().executeSql(
+    `UPDATE profiles SET ${fields.join(', ')} WHERE id = ?`,
+    values,
+  );
+}
+
+export async function deleteProfile(id: number): Promise<void> {
+  await getDB().executeSql('DELETE FROM saved_words WHERE profile_id = ?', [id]);
+  await getDB().executeSql('DELETE FROM profiles WHERE id = ?', [id]);
+}
+
+export async function getSetting(key: string): Promise<string | null> {
+  const [results] = await getDB().executeSql(
+    'SELECT value FROM settings WHERE key = ?',
+    [key],
+  );
+  if (results.rows.length === 0) return null;
+  return results.rows.item(0).value as string;
+}
+
+export async function setSetting(key: string, value: string): Promise<void> {
+  await getDB().executeSql(
+    'INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)',
+    [key, value],
+  );
+}
