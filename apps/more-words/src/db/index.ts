@@ -6,6 +6,8 @@ export {
   saveWord,
   getSavedWords,
   updateMastery,
+  removeWord,
+  getSavedWordCount,
   getDefaultProfile,
 } from './database';
 

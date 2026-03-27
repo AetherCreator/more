@@ -270,6 +270,24 @@ export async function updateMastery(
   );
 }
 
+export async function removeWord(
+  profileId: number,
+  wordId: number,
+): Promise<void> {
+  await getDB().executeSql(
+    'DELETE FROM saved_words WHERE profile_id = ? AND word_id = ?',
+    [profileId, wordId],
+  );
+}
+
+export async function getSavedWordCount(profileId: number): Promise<number> {
+  const [results] = await getDB().executeSql(
+    'SELECT COUNT(*) as c FROM saved_words WHERE profile_id = ?',
+    [profileId],
+  );
+  return results.rows.item(0).c as number;
+}
+
 export async function getDefaultProfile(): Promise<Profile> {
   const [results] = await getDB().executeSql(
     'SELECT * FROM profiles ORDER BY id ASC LIMIT 1',
