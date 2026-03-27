@@ -1,12 +1,23 @@
-import React, {useEffect, useState} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {View, Text, StyleSheet, ActivityIndicator} from 'react-native';
+import React, {useEffect, useRef, useState} from 'react';
+import {
+  AppState,
+  Linking,
+  NavigationContainer,
+  View,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+} from 'react-native';
+import {NavigationContainer as NavContainer} from '@react-navigation/native';
+import {NavigationContainerRef} from '@react-navigation/native';
 import TabNavigator from './src/navigation/TabNavigator';
 import {initDB} from './src/db';
+import {refreshWidgets} from '@more/widgets';
 
 export default function App(): React.JSX.Element {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigationRef = useRef<any>(null);
 
   useEffect(() => {
     initDB()
@@ -16,6 +27,29 @@ export default function App(): React.JSX.Element {
         setError(String(err));
       });
   }, []);
+
+  // Refresh widgets on app foreground
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', nextState => {
+      if (nextState === 'active') {
+        refreshWidgets();
+      }
+    });
+    return () => sub.remove();
+  }, []);
+
+  // Deep link handling
+  const linking = {
+    prefixes: ['morewords://'],
+    config: {
+      screens: {
+        Feed: 'feed',
+        Deck: 'deck',
+        Play: 'play',
+        Settings: 'settings',
+      },
+    },
+  };
 
   if (error) {
     return (
@@ -35,9 +69,9 @@ export default function App(): React.JSX.Element {
   }
 
   return (
-    <NavigationContainer>
+    <NavContainer ref={navigationRef} linking={linking}>
       <TabNavigator />
-    </NavigationContainer>
+    </NavContainer>
   );
 }
 
