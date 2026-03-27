@@ -4,9 +4,10 @@ import {getSavedWordCount} from '../db';
 import FlashcardScreen from './FlashcardScreen';
 import MatchGameScreen from './MatchGameScreen';
 import FillBlankScreen from './FillBlankScreen';
+import CrosswordScreen from './CrosswordScreen';
 import {defaultTheme} from '../theme';
 
-type ActiveGame = null | 'flashcards' | 'match' | 'fill-blank';
+type ActiveGame = null | 'flashcards' | 'match' | 'fill-blank' | 'crossword';
 
 const t = defaultTheme;
 const GAMES_UNLOCK = 10;
@@ -36,6 +37,12 @@ const GAMES: GameOption[] = [
     title: 'Fill in the Blank',
     description: 'Complete the sentence with the right word',
     icon: '✏️',
+  },
+  {
+    id: 'crossword',
+    title: 'Crosswords',
+    description: 'Random, daily, or from your deck',
+    icon: '⬛',
   },
 ];
 
@@ -70,6 +77,9 @@ export default function PlayScreen(): React.JSX.Element {
   }
   if (activeGame === 'fill-blank') {
     return <FillBlankScreen onBack={handleBack} />;
+  }
+  if (activeGame === 'crossword') {
+    return <CrosswordScreen onBack={handleBack} />;
   }
 
   const locked = wordCount < GAMES_UNLOCK;
