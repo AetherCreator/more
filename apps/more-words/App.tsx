@@ -1,31 +1,41 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {
   AppState,
-  Linking,
-  NavigationContainer,
   View,
   Text,
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import {NavigationContainer as NavContainer} from '@react-navigation/native';
-import {NavigationContainerRef} from '@react-navigation/native';
+import {NavigationContainer} from '@react-navigation/native';
 import TabNavigator from './src/navigation/TabNavigator';
-import {initDB} from './src/db';
+import {initDB, getSetting, setSetting, createProfile} from './src/db';
 import {refreshWidgets} from '@more/widgets';
+import {initSubscriptions} from './src/utils/subscription';
+import {ProfileProvider} from './src/context/ProfileContext';
+import OnboardingScreen, {type OnboardingData} from './src/screens/OnboardingScreen';
 
 export default function App(): React.JSX.Element {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [onboarded, setOnboarded] = useState<boolean | null>(null);
   const navigationRef = useRef<any>(null);
 
   useEffect(() => {
-    initDB()
-      .then(() => setReady(true))
-      .catch(err => {
-        console.error('[MoreWords] DB init failed:', err);
-        setError(String(err));
-      });
+    async function boot() {
+      try {
+        await initDB();
+        await initSubscriptions();
+        const onboardedFlag = await getSetting('onboarded');
+        setOnboarded(onboardedFlag === 'true');
+        setReady(true);
+      } catch (err) {
+        console.error('[MoreWords] Boot failed:', err);
+        // Fallback: skip DB check, proceed as onboarded
+        setOnboarded(false);
+        setReady(true);
+      }
+    }
+    boot();
   }, []);
 
   // Refresh widgets on app foreground
@@ -37,6 +47,16 @@ export default function App(): React.JSX.Element {
     });
     return () => sub.remove();
   }, []);
+
+  async function handleOnboardingComplete(data: OnboardingData) {
+    try {
+      await createProfile(data.name, data.isKid ? 1 : 0, data.theme, JSON.stringify(data.interests));
+      await setSetting('onboarded', 'true');
+    } catch {
+      // DB not wired — proceed anyway
+    }
+    setOnboarded(true);
+  }
 
   // Deep link handling
   const linking = {
@@ -54,7 +74,7 @@ export default function App(): React.JSX.Element {
   if (error) {
     return (
       <View style={styles.loading}>
-        <Text style={styles.errorText}>DB Error: {error}</Text>
+        <Text style={styles.errorText}>Error: {error}</Text>
       </View>
     );
   }
@@ -68,10 +88,16 @@ export default function App(): React.JSX.Element {
     );
   }
 
+  if (!onboarded) {
+    return <OnboardingScreen onComplete={handleOnboardingComplete} />;
+  }
+
   return (
-    <NavContainer ref={navigationRef} linking={linking}>
-      <TabNavigator />
-    </NavContainer>
+    <ProfileProvider>
+      <NavigationContainer ref={navigationRef} linking={linking}>
+        <TabNavigator />
+      </NavigationContainer>
+    </ProfileProvider>
   );
 }
 
