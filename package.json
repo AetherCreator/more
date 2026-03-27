@@ -1,0 +1,17 @@
+{
+  "name": "more",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "start": "yarn workspace more-words start",
+    "ios": "yarn workspace more-words ios",
+    "android": "yarn workspace more-words android",
+    "lint": "yarn workspace more-words lint"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

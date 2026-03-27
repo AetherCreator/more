@@ -1,0 +1,30 @@
+{
+  "name": "more-words",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "react-native start",
+    "ios": "react-native run-ios",
+    "android": "react-native run-android",
+    "lint": "eslint . --ext .ts,.tsx",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@more/engine": "0.1.0",
+    "@more/crossword": "0.1.0",
+    "@more/widgets": "0.1.0",
+    "@more/ai": "0.1.0",
+    "@react-navigation/bottom-tabs": "^6.6.1",
+    "@react-navigation/native": "^6.1.18",
+    "@react-navigation/native-stack": "^6.11.0",
+    "react": "18.3.1",
+    "react-native": "0.75.4",
+    "react-native-safe-area-context": "^4.14.0",
+    "react-native-screens": "^4.4.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-native": "^0.73.0",
+    "typescript": "^5.3.3"
+  }
+}
