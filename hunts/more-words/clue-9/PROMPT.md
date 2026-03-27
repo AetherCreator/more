@@ -44,7 +44,14 @@ Generates crossword from word pool matching profile's categories
 
 ### Mode 2: Daily Crossword
 Play tab → "Crossword" → "Daily"
-Same puzzle for all users each day (seed daily generator with date string)
+Same puzzle for all users each day. Seed the generator deterministically using the date string as a hash seed:
+```typescript
+// Deterministic daily seed: hash "YYYY-MM-DD" to a number, use as PRNG seed
+const dailySeed = hashDateString(new Date().toISOString().slice(0, 10));
+// Use this seed to: (1) select which words from the pool, (2) shuffle order before passing to generator
+// Any consistent hash function works — simple djb2 or similar
+```
+This ensures every user on the same day gets the same word selection AND the same grid layout.
 Shareable result: "MoreWords Daily Crossword — 3/27 ✓ Completed in 4:32"
 Shows "Come back tomorrow" when completed
 
@@ -82,6 +89,7 @@ My Words: "You knew all these words!" message.
 - [ ] My Words locked under 15 saved words
 - [ ] Completion screen shows time taken
 - [ ] No console errors
+- [ ] Clue 10 Pre-Research section written in COMPLETE.md with library recommendation, App Group confirmation, refresh strategy, and known limitations
 
 ## Do Not
 - Build widgets — Clue 10
@@ -92,7 +100,17 @@ My Words: "You knew all these words!" message.
 ## When You Pass
 Write `hunts/more-words/clue-9/COMPLETE.md` with:
 - CrosswordPlayer key implementation details
-- How daily seed works (date → consistent puzzle)
+- How daily seed works (date → hash → consistent puzzle)
 - How My Words crossword formats deck words as CrosswordInput[]
+
+### Clue 10 Pre-Research (REQUIRED)
+Before finishing COMPLETE.md, research and document the following for Clue 10 (Widget System). This research is mandatory — Clue 10 will fail without it.
+
+1. **WidgetKit bridge library**: Evaluate `react-native-widget-extension`, `@baked-ai/react-native-widget-kit`, or writing a native Swift widget target. Document: which one you recommend, why, and any known issues with React Native + WidgetKit.
+2. **App Group data sharing**: Confirm the App Group container from Clue 2 (`group.com.more.morewords`) is accessible from a widget extension. Document: how to open the shared SQLite database from Swift/WidgetKit code.
+3. **TimelineProvider refresh**: Document how each widget type should refresh — Word of Day (daily at midnight), Streak (on app foreground), My Words (every 2 hours), Art Widget (daily).
+4. **Known limitations**: Any gotchas — widget size constraints, memory limits, image rendering restrictions, or library bugs found during research.
+
+Write this under a clearly labeled **"Clue 10 Pre-Research"** section in COMPLETE.md.
 
 Then open `hunts/more-words/clue-10/PROMPT.md`.

@@ -37,7 +37,7 @@ Full-screen card showing one word at a time.
 
 ### Actions on card
 - **Heart button** (bottom right): saves word to deck. Fills gold on save. Haptic feedback.
-- **Share button** (bottom left): generates a clean word card image (word + definition + "MoreWords") shareable to Messages/Instagram
+- **Share button** (bottom left): generates a shareable word card image using `react-native-view-shot` to capture a styled View as PNG. The captured image contains: word (large), definition, and "MoreWords" branding. Share via React Native's `Share` API. The captured View should be a hidden off-screen component styled specifically for sharing (not a screenshot of the card).
 - Swipe up: next word
 - Swipe down: previous word (if any)
 

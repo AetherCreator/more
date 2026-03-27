@@ -54,20 +54,39 @@ export const getAICuratedWords: (
 ) => Promise<Word[]>
 ```
 
+**Important: Pre-filter before API call.** Do NOT send the entire 500-word database to Claude. That's ~50K tokens of input and will be slow and expensive. Instead:
+
+1. Query SQLite for words matching the user's interest categories (e.g. `WHERE category IN ('art', 'mythology', 'metaphysical')`)
+2. Exclude words already in the user's deck
+3. If kid profile, filter to `kid_safe = 1` only
+4. Cap the candidate list at 100 words maximum
+5. Send only these pre-filtered candidates to Claude
+
+```typescript
+// Pre-filter: ~100 candidates instead of 500
+const candidates = await getWordsByCategories(interests, 100, isKid);
+const filtered = candidates.filter(w => !existingDeckWords.includes(w.word));
+
+// Send condensed format to minimize tokens:
+const wordList = filtered.map(w => `${w.id}|${w.word}|${w.category}`).join('\n');
+```
+
 Call Claude API (claude-sonnet-4-20250514):
 ```
-System: You are a vocabulary curator. Given user interests and words they already know, select [count] vocabulary words from the provided database that best match their interests. Avoid words already in their deck. For kid profiles, ensure all words are age-appropriate and engaging. Return ONLY a JSON array of word IDs.
+System: You are a vocabulary curator for the MoreWords app. Given a user's interests and a list of candidate words (pre-filtered by category), select the [count] most engaging and interesting words for this user. Prioritize: variety within their interests, words with rich etymology or surprising meanings, and a mix of difficulties. Return ONLY a JSON array of word IDs, nothing else. Example: [42, 17, 93, 5]
 
-User: Interests: [art, mythology, metaphysical]. Deck words to avoid: [luminous, ethereal]. Available words: [serialized word list with IDs]. Select 15 words.
+User: Interests: [art, mythology, metaphysical]. Select 15 words from these candidates:
+[condensed word list]
 ```
 
-Parse response, fetch full word records from SQLite.
-Fallback: if API fails or bundle not active, use static category-based selection.
+Parse response → fetch full word records from SQLite by ID.
+
+**Fallback:** if API fails, is rate limited, or bundle is not active, fall back to category-based selection: `getDailyWords()` filtered by interest categories, ordered by difficulty variety.
 
 AI curation runs:
-- On first app launch after onboarding
-- Once weekly (check settings for 'last_ai_refresh' date)
-- When user adds new interests
+- On first app launch after onboarding (if bundle active)
+- Once weekly — check settings for `last_ai_refresh` date, refresh if >7 days
+- When user adds new interests in profile settings
 
 ### Part 3: More. Bundle (RevenueCat)
 Install react-native-purchases (RevenueCat).
@@ -109,6 +128,7 @@ Install react-native-purchases (RevenueCat).
 - [ ] Profile created with name, interests, theme after onboarding
 - [ ] First word shown on final onboarding screen
 - [ ] AI curation calls Claude API and returns interest-matched words
+- [ ] AI curation pre-filters candidates (≤100 words sent to API, not entire database)
 - [ ] AI curation falls back gracefully if API fails
 - [ ] AI refresh runs weekly (not on every launch)
 - [ ] RevenueCat initialized without errors
