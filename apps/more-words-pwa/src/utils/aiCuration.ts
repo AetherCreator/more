@@ -3,9 +3,9 @@ import type { Word } from '../db/types'
 
 export async function fetchCuratedWordIds(interests: string[]): Promise<number[]> {
   try {
-    const response = await fetch('/api/claude', {
+    const response = await fetch('https://thechefos.com/api/claude', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-product': 'morewords' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 512,
