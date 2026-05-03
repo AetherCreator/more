@@ -3,7 +3,7 @@ import type { Word } from '../db/types'
 
 export async function fetchCuratedWordIds(interests: string[]): Promise<number[]> {
   try {
-    const response = await fetch('https://thechefos.com/api/claude', {
+    const response = await fetch('https://api.thechefos.app/ai/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-product': 'morewords' },
       body: JSON.stringify({
