@@ -84,7 +84,11 @@ export async function initDB(): Promise<Database> {
   if (db) return db
 
   const SQL = await initSqlJs({
-    locateFile: (file: string) => `https://sql.js.org/dist/${file}`,
+    // Self-host the WASM (Vite copies node_modules/sql.js/dist/sql-wasm.wasm
+    // into public/ at build time). Loading from the sql.js public CDN was
+    // failing under PWA/COOP rules with 'both async and sync fetching of the
+    // wasm failed' — file naming mismatch + cross-origin fetch.
+    locateFile: () => '/sql-wasm.wasm',
   })
 
   const saved = await loadFromIndexedDB()
